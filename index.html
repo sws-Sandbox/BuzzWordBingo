@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>River Rafting Reunion Buzzword Bingo</title>
+<style>
+  :root {
+    --bg: #0e3a53;
+    --bg2: #12506f;
+    --card: #ffffff;
+    --tile: #f4f9fb;
+    --tile-marked: #2fa36b;
+    --tile-marked-text: #ffffff;
+    --free: #f2b705;
+    --accent: #38b6ff;
+    --text: #10333f;
+    --win: #ff6b35;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bg), var(--bg2));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 10px 28px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  h1 {
+    font-size: clamp(1.1rem, 5.2vw, 1.7rem);
+    margin: 0 0 2px;
+    line-height: 1.15;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .subtitle {
+    font-size: clamp(0.7rem, 3.2vw, 0.9rem);
+    opacity: 0.85;
+    margin: 0;
+  }
+
+  .board-wrap {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .tile {
+    background: var(--tile);
+    color: var(--text);
+    border: 1px solid #d7e6ec;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3px;
+    font-size: clamp(0.42rem, 2.15vw, 0.78rem);
+    font-weight: 600;
+    line-height: 1.05;
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+    word-break: break-word;
+    hyphens: auto;
+    transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .tile:active { transform: scale(0.94); }
+
+  .tile.marked {
+    background: var(--tile-marked);
+    color: var(--tile-marked-text);
+    border-color: var(--tile-marked);
+  }
+
+  .tile.free {
+    background: var(--free);
+    color: #4a3500;
+    border-color: var(--free);
+    cursor: default;
+    font-weight: 800;
+  }
+
+  .tile.win {
+    animation: pop 0.6s ease infinite alternate;
+    box-shadow: 0 0 0 2px var(--win) inset;
+  }
+
+  @keyframes pop {
+    from { transform: scale(1); }
+    to   { transform: scale(1.04); }
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  button {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: transform 0.08s ease, opacity 0.15s ease;
+  }
+
+  button:active { transform: translateY(1px); }
+  button.secondary { background: #4a6b7a; }
+
+  .status {
+    margin-top: 12px;
+    min-height: 1.4em;
+    font-size: clamp(0.85rem, 4vw, 1.1rem);
+    font-weight: 700;
+    text-align: center;
+    height: 1.4em;
+  }
+
+  .winner {
+    color: var(--win);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    animation: flash 0.8s ease infinite alternate;
+  }
+
+  @keyframes flash {
+    from { opacity: 0.75; }
+    to   { opacity: 1; }
+  }
+
+  footer {
+    margin-top: 16px;
+    font-size: 0.7rem;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  .noscript-msg {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    padding: 24px 12px;
+  }
+  .noscript-msg strong { color: #c0392b; }
+
+  /* ---- Full house celebration overlay ---- */
+  .win-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at 50% 40%, rgba(20,80,111,0.96), rgba(6,26,38,0.98));
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    text-align: center;
+  }
+
+  .win-overlay.show {
+    display: flex;
+    animation: overlayIn 0.35s ease;
+  }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .win-card {
+    position: relative;
+    max-width: 92vw;
+    width: 460px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .trophy {
+    width: min(62vw, 260px);
+    height: auto;
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5));
+    animation: trophyPop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+               trophyFloat 2.4s ease-in-out 0.6s infinite alternate;
+  }
+
+  @keyframes trophyPop {
+    from { transform: scale(0.2) rotate(-12deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  @keyframes trophyFloat {
+    from { transform: translateY(0) rotate(-2deg); }
+    to   { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  .win-big {
+    margin-top: 10px;
+    font-size: clamp(2.2rem, 12vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: var(--free);
+    text-shadow: 0 3px 0 #b98700, 0 6px 18px rgba(0,0,0,0.5);
+    animation: bigPulse 0.9s ease infinite alternate;
+  }
+
+  @keyframes bigPulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.06); }
+  }
+
+  .win-sub {
+    margin-top: 8px;
+    font-size: clamp(1rem, 5vw, 1.4rem);
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .win-note {
+    margin-top: 4px;
+    font-size: clamp(0.8rem, 3.6vw, 1rem);
+    color: #cfe8f2;
+  }
+
+  #closeWin {
+    margin-top: 22px;
+    width: auto;
+    padding: 14px 34px;
+    font-size: 1.05rem;
+    background: var(--free);
+    color: #4a3500;
+  }
+
+  /* Falling confetti */
+  .confetti {
+    position: fixed;
+    top: -12vh;
+    width: 10px;
+    height: 16px;
+    opacity: 0.9;
+    z-index: 998;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(120vh) rotate(720deg);
+      opacity: 0.9;
+    }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>River Rafting Reunion<br />Buzzword Bingo</h1>
+    <p class="subtitle">Tap a square when you hear it. Refresh for a new card.</p>
+  </header>
+
+  <div class="board-wrap">
+    <div id="grid" class="grid" aria-label="Bingo card"></div>
+    <noscript>
+      <div class="noscript-msg">
+        <strong>JavaScript is turned off</strong>, so the bingo card can&rsquo;t load.
+        This happens when the file is opened in a preview app.<br /><br />
+        Open this page in <strong>Safari</strong> (or use a shared web link) to play.
+      </div>
+    </noscript>
+  </div>
+
+  <div class="status" id="status">&nbsp;</div>
+
+  <div class="controls">
+    <button id="newCard">New Card</button>
+    <button id="reset" class="secondary">Clear Marks</button>
+  </div>
+
+  <footer>Free space in the center &bull; Line, or full-house wins</footer>
+
+  <div id="winOverlay" class="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="win-card">
+      <svg class="trophy" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe07a"/>
+            <stop offset="0.5" stop-color="#f2b705"/>
+            <stop offset="1" stop-color="#b98700"/>
+          </linearGradient>
+        </defs>
+        <!-- Handles -->
+        <path d="M52 40 C10 40 10 100 60 104" fill="none" stroke="url(#gold)" stroke-width="12" stroke-linecap="round"/>
+        <path d="M148 40 C190 40 190 100 140 104" fill="none" stroke="url(#gold)" stroke-width="12" stroke-linecap="round"/>
+        <!-- Cup -->
+        <path d="M50 30 H150 V70 C150 112 128 132 100 132 C72 132 50 112 50 70 Z" fill="url(#gold)" stroke="#8a6400" stroke-width="3"/>
+        <!-- Stem + base -->
+        <rect x="92" y="132" width="16" height="28" fill="url(#gold)"/>
+        <rect x="66" y="160" width="68" height="14" rx="4" fill="url(#gold)" stroke="#8a6400" stroke-width="2"/>
+        <rect x="56" y="174" width="88" height="16" rx="5" fill="url(#gold)" stroke="#8a6400" stroke-width="2"/>
+        <!-- Number 1 -->
+        <text x="100" y="92" font-family="Arial, sans-serif" font-size="52" font-weight="900" fill="#8a6400" text-anchor="middle">1</text>
+      </svg>
+      <div class="win-big">FULL HOUSE!</div>
+      <div class="win-sub">Blackout Bingo</div>
+      <div class="win-note">Every single square &mdash; you are the champion of the reunion!</div>
+      <button id="closeWin">New Card</button>
+    </div>
+  </div>
+
+<script>
+  // All buzzwords are embedded directly in this file, so the game works fully
+  // offline with no external files and no network. Just open bingo.html.
+  const WORDS = [
+    "Keg Stand","Beer Pong","Flip Cup","Solo Cup","Power Hour","Shotgun a Beer",
+    "Case Race","Beer Bong","Jungle Juice","Trash Can Punch","Everclear",
+    "Handle of Vodka","Franzia","Boxed Wine","Goldschlager","Jager Bomb",
+    "Tequila Shots","Body Shot","Well Drinks","Natty Light","Keystone Light","PBR",
+    "Four Loko","Bong Rip","Wake and Bake","Dorm Room Haze","Munchies",
+    "Sketchy House Party","Frat House","Toga Party","Foam Party","Theme Party",
+    "Rager","Pregame","Darty","Bar Crawl","Dollar Beer Night","Ladies Night",
+    "Last Call","Closing the Bar","Walk of Shame","Blackout","Hungover",
+    "Hair of the Dog","Puked in a Bush","Passed Out","Spins","Beer Goggles",
+    "Drunk Dial","Booty Call","Hooked Up","Dorm Hookup","Roommate Sexiled",
+    "Streaking","Skinny Dipping","Truth or Dare","Never Have I Ever","Cop Encounter",
+    "Fake ID","Bouncer Denied","Noise Complaint","RA Wrote Us Up","Campus Police",
+    "Bailed Out","Slept Through Class","Skipped Lecture","Crammed All Night",
+    "Pulled an All Nighter","Ramen Dinner","Cold Pizza Breakfast","Dining Hall Raid",
+    "Vending Machine Dinner","Cafeteria Tray Sled","Dumpster Couch","Futon Crash Pad",
+    "Milk Crate Shelf","Christmas Lights Decor","Community Bathroom",
+    "Laundry Once a Month","Borrowed Someone's Notes","Group Project Slacker",
+    "Curved the Grade","Academic Probation","Cheated on a Quiz","Professor Rant",
+    "8 AM Class","Failed the Midterm","Spring Break Trip","Road Trip Van",
+    "Slept in the Car","Lost My Wallet","Missing Shoe","Ripped Jeans","Someone Cried",
+    "Bad Tattoo Idea","Regret in the Morning","Legendary Story","Do Not Remember",
+    "That One Roommate","We Were Young"
+  ];
+
+  const FREE_SPACE = "FREE\nSPACE";
+  const grid = document.getElementById("grid");
+  const statusEl = document.getElementById("status");
+
+  // Fisher-Yates shuffle
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let tiles = []; // 25 tile elements in order
+
+  function buildCard(words) {
+    grid.innerHTML = "";
+    tiles = [];
+    statusEl.textContent = "\u00a0";
+    statusEl.classList.remove("winner");
+    hideFullHouse();
+
+    const picked = shuffle(words).slice(0, 24);
+    const cells = [];
+    for (let i = 0; i < 25; i++) {
+      if (i === 12) {
+        cells.push({ text: FREE_SPACE, free: true });
+      } else {
+        cells.push({ text: picked.pop(), free: false });
+      }
+    }
+
+    cells.forEach((cell, idx) => {
+      const div = document.createElement("div");
+      div.className = "tile" + (cell.free ? " free" : "");
+      div.textContent = cell.text;
+      div.dataset.index = idx;
+      if (cell.free) {
+        div.classList.add("marked");
+      } else {
+        div.addEventListener("click", () => {
+          div.classList.toggle("marked");
+          checkWin();
+        });
+      }
+      grid.appendChild(div);
+      tiles.push(div);
+    });
+
+    checkWin();
+  }
+
+  function isMarked(idx) {
+    return tiles[idx].classList.contains("marked");
+  }
+
+  function getWinningCells() {
+    const lines = [];
+    // Rows
+    for (let r = 0; r < 5; r++) {
+      lines.push([0,1,2,3,4].map(c => r * 5 + c));
+    }
+    // Columns
+    for (let c = 0; c < 5; c++) {
+      lines.push([0,1,2,3,4].map(r => r * 5 + c));
+    }
+    // Diagonals
+    lines.push([0, 6, 12, 18, 24]);
+    lines.push([4, 8, 12, 16, 20]);
+
+    const winners = new Set();
+    let won = false;
+    for (const line of lines) {
+      if (line.every(isMarked)) {
+        won = true;
+        line.forEach(i => winners.add(i));
+      }
+    }
+    return { won, winners };
+  }
+
+  function isFullHouse() {
+    // Every one of the 25 squares marked (the free space is always marked).
+    for (let i = 0; i < 25; i++) {
+      if (!isMarked(i)) return false;
+    }
+    return true;
+  }
+
+  function checkWin() {
+    const { won, winners } = getWinningCells();
+    tiles.forEach((t, i) => t.classList.toggle("win", winners.has(i)));
+    if (won) {
+      statusEl.textContent = "\uD83C\uDF89 BINGO! \uD83D\uDEF6";
+      statusEl.classList.add("winner");
+    } else {
+      statusEl.textContent = "\u00a0";
+      statusEl.classList.remove("winner");
+    }
+
+    if (isFullHouse()) {
+      showFullHouse();
+    }
+  }
+
+  const winOverlay = document.getElementById("winOverlay");
+  let fullHouseShown = false;
+
+  function launchConfetti() {
+    const colors = ["#f2b705", "#38b6ff", "#2fa36b", "#ff6b35", "#ffffff", "#ff4d9d"];
+    for (let i = 0; i < 80; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (2 + Math.random() * 2.5) + "s";
+      c.style.animationDelay = (Math.random() * 0.6) + "s";
+      c.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5200);
+    }
+  }
+
+  function showFullHouse() {
+    if (fullHouseShown) return;
+    fullHouseShown = true;
+    winOverlay.classList.add("show");
+    winOverlay.setAttribute("aria-hidden", "false");
+    launchConfetti();
+  }
+
+  function hideFullHouse() {
+    fullHouseShown = false;
+    winOverlay.classList.remove("show");
+    winOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  const currentWords = WORDS;
+
+  document.getElementById("newCard").addEventListener("click", () => {
+    buildCard(currentWords);
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    tiles.forEach((t, i) => {
+      if (i !== 12) t.classList.remove("marked");
+      t.classList.remove("win");
+    });
+    hideFullHouse();
+    checkWin();
+  });
+
+  document.getElementById("closeWin").addEventListener("click", () => {
+    buildCard(currentWords);
+  });
+
+  // Build a fresh shuffled card on load. Refreshing the page reshuffles.
+  buildCard(WORDS);
+</script>
+</body>
+</html>
