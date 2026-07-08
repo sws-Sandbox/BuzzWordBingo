@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>River Rafting Reunion Buzzword Bingo</title>
+<title>BuzzWordBingo</title>
 <style>
   :root {
     --bg: #0e3a53;
@@ -295,7 +295,7 @@
 </head>
 <body>
   <header>
-    <h1>River Rafting Reunion<br />Buzzword Bingo</h1>
+    <h1>BuzzWordBingo</h1>
     <p class="subtitle">Tap a square when you hear it. Refresh for a new card.</p>
   </header>
 
@@ -349,32 +349,8 @@
   </div>
 
 <script>
-  // All buzzwords are embedded directly in this file, so the game works fully
-  // offline with no external files and no network. Just open bingo.html.
-  const WORDS = [
-    "Keg Stand","Beer Pong","Flip Cup","Solo Cup","Power Hour","Shotgun a Beer",
-    "Case Race","Beer Bong","Jungle Juice","Trash Can Punch","Everclear",
-    "Handle of Vodka","Franzia","Boxed Wine","Goldschlager","Jager Bomb",
-    "Tequila Shots","Body Shot","Well Drinks","Natty Light","Keystone Light","PBR",
-    "Four Loko","Bong Rip","Wake and Bake","Dorm Room Haze","Munchies",
-    "Sketchy House Party","Frat House","Toga Party","Foam Party","Theme Party",
-    "Rager","Pregame","Darty","Bar Crawl","Dollar Beer Night","Ladies Night",
-    "Last Call","Closing the Bar","Walk of Shame","Blackout","Hungover",
-    "Hair of the Dog","Puked in a Bush","Passed Out","Spins","Beer Goggles",
-    "Drunk Dial","Booty Call","Hooked Up","Dorm Hookup","Roommate Sexiled",
-    "Streaking","Skinny Dipping","Truth or Dare","Never Have I Ever","Cop Encounter",
-    "Fake ID","Bouncer Denied","Noise Complaint","RA Wrote Us Up","Campus Police",
-    "Bailed Out","Slept Through Class","Skipped Lecture","Crammed All Night",
-    "Pulled an All Nighter","Ramen Dinner","Cold Pizza Breakfast","Dining Hall Raid",
-    "Vending Machine Dinner","Cafeteria Tray Sled","Dumpster Couch","Futon Crash Pad",
-    "Milk Crate Shelf","Christmas Lights Decor","Community Bathroom",
-    "Laundry Once a Month","Borrowed Someone's Notes","Group Project Slacker",
-    "Curved the Grade","Academic Probation","Cheated on a Quiz","Professor Rant",
-    "8 AM Class","Failed the Midterm","Spring Break Trip","Road Trip Van",
-    "Slept in the Car","Lost My Wallet","Missing Shoe","Ripped Jeans","Someone Cried",
-    "Bad Tattoo Idea","Regret in the Morning","Legendary Story","Do Not Remember",
-    "That One Roommate","We Were Young"
-  ];
+  // Words are read live from buzzwords.txt (in the same folder). Edit that file
+  // to change the game -- no need to touch this HTML.
 
   const FREE_SPACE = "FREE\nSPACE";
   const grid = document.getElementById("grid");
@@ -388,6 +364,19 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  // Read words from buzzwords.txt. Refreshing reshuffles from the latest file.
+  async function loadWords() {
+    const res = await fetch("buzzwords.txt?_=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("Could not load buzzwords.txt");
+    const text = await res.text();
+    const words = text
+      .split(/\r?\n/)
+      .map(w => w.trim())
+      .filter(w => w.length > 0);
+    if (words.length < 24) throw new Error("buzzwords.txt needs at least 24 words");
+    return words;
   }
 
   let tiles = []; // 25 tile elements in order
@@ -514,10 +503,10 @@
     winOverlay.setAttribute("aria-hidden", "true");
   }
 
-  const currentWords = WORDS;
+  let currentWords = [];
 
   document.getElementById("newCard").addEventListener("click", () => {
-    buildCard(currentWords);
+    if (currentWords.length) buildCard(currentWords);
   });
 
   document.getElementById("reset").addEventListener("click", () => {
@@ -533,8 +522,16 @@
     buildCard(currentWords);
   });
 
-  // Build a fresh shuffled card on load. Refreshing the page reshuffles.
-  buildCard(WORDS);
+  // Load the word list from buzzwords.txt, then build a fresh shuffled card.
+  // Refreshing the page reshuffles.
+  loadWords()
+    .then(words => {
+      currentWords = words;
+      buildCard(words);
+    })
+    .catch(() => {
+      statusEl.textContent = "Couldn't load buzzwords.txt";
+    });
 </script>
 </body>
 </html>
